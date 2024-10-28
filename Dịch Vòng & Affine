@@ -1,0 +1,145 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+// Hàm chuyển đổi chuỗi thành chữ hoa
+string chuyenChuHoa(string str) {
+    for (char &c : str) {
+        if (islower(c)) {
+            c = toupper(c);
+        }
+    }
+    return str;
+}
+
+// Mã hóa Caesar (Vòng)
+string maHoaCaesar(string vanBan, int khoa) {
+    string ketQua = "";
+    for (char c : vanBan) {
+        if (isupper(c))
+            ketQua += char(int(c + khoa - 65) % 26 + 65);
+        else if (islower(c))
+            ketQua += char(int(c + khoa - 97) % 26 + 97);
+        else
+            ketQua += c;
+    }
+    return ketQua;
+}
+
+string giaiMaCaesar(string vanBan, int khoa) {
+    return maHoaCaesar(vanBan, 26 - khoa);
+}
+
+// Mã hóa Affine
+string maHoaAffine(string vanBan, int a, int b) {
+    string ketQua = "";
+    for (char c : vanBan) {
+        if (isupper(c))
+            ketQua += char(((a * (c - 'A') + b) % 26) + 'A');
+        else if (islower(c))
+            ketQua += char(((a * (c - 'a') + b) % 26) + 'a');
+        else
+            ketQua += c;
+    }
+    return ketQua;
+}
+
+string giaiMaAffine(string vanBan, int a, int b) {
+    string ketQua = "";
+    int a_inv = 0;
+    for (int i = 0; i < 26; i++) {
+        if ((a * i) % 26 == 1) {
+            a_inv = i;
+            break;
+        }
+    }
+    for (char c : vanBan) {
+        if (isupper(c))
+            ketQua += char((a_inv * ((c - 'A' - b + 26) % 26)) % 26 + 'A');
+        else if (islower(c))
+            ketQua += char((a_inv * ((c - 'a' - b + 26) % 26)) % 26 + 'a');
+        else
+            ketQua += c;
+    }
+    return ketQua;
+}
+
+// Hàm lưu kết quả vào tệp
+void luuVaoTep(const string &tenTep, const string &ketQua) {
+    ofstream file(tenTep);
+    if (file.is_open()) {
+        file << ketQua;
+        file.close();
+        cout << "Đã lưu vào tệp " << tenTep << endl;
+    } else {
+        cout << "Không thể mở tệp để ghi!" << endl;
+    }
+}
+
+// Hàm đọc dữ liệu từ tệp
+string docTuTep(const string &tenTep) {
+    ifstream file(tenTep);
+    string noiDung, dong;
+    if (file.is_open()) {
+        while (getline(file, dong)) {
+            noiDung += dong + "\n";
+        }
+        file.close();
+    } else {
+        cout << "Không thể mở tệp để đọc!" << endl;
+    }
+    return noiDung;
+}
+
+// Menu chính
+int main() {
+    int luaChon;
+    string vanBan, khoa, tenTep;
+    int khoaCaesar, aAffine, bAffine;
+
+    do {
+        cout << "\nChọn phương pháp mã hóa/giải mã:\n";
+        cout << "1. Mã hóa/giải mã Caesar\n";
+        cout << "2. Mã hóa/giải mã Affine\n";
+        cout << "0. Thoát\n";
+        cout << "Lựa chọn: ";
+        cin >> luaChon;
+
+        if (luaChon == 1) {
+            cout << "Nhập văn bản: ";
+            cin.ignore();
+            getline(cin, vanBan);
+            cout << "Nhập khóa Caesar: ";
+            cin >> khoaCaesar;
+
+            string maHoa = maHoaCaesar(vanBan, khoaCaesar);
+            cout << "Mã hóa Caesar: " << maHoa << endl;
+            cout << "Giải mã Caesar: " << giaiMaCaesar(maHoa, khoaCaesar) << endl;
+
+            cout << "Nhập tên tệp để lưu kết quả: ";
+            cin >> tenTep;
+            luuVaoTep(tenTep, maHoa);
+
+        } else if (luaChon == 2) {
+            cout << "Nhập văn bản: ";
+            cin.ignore();
+            getline(cin, vanBan);
+            cout << "Nhập a và b cho Affine (a và 26 phải nguyên tố cùng nhau): ";
+            cin >> aAffine >> bAffine;
+
+            string maHoa = maHoaAffine(vanBan, aAffine, bAffine);
+            cout << "Mã hóa Affine: " << maHoa << endl;
+            cout << "Giải mã Affine: " << giaiMaAffine(maHoa, aAffine, bAffine) << endl;
+
+            cout << "Nhập tên tệp để lưu kết quả: ";
+            cin >> tenTep;
+            luuVaoTep(tenTep, maHoa);
+
+        }
+
+    } while (luaChon != 0);
+
+    return 0;
+}
