@@ -1,0 +1,117 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+// Hàm mã hóa và giải mã thay thế
+string maHoaThayThe(string vanBan, char khoa) {
+    string ketQua = "";
+    for (char c : vanBan) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            ketQua += char((c - base + (khoa - base)) % 26 + base);
+        } else {
+            ketQua += c;
+        }
+    }
+    return ketQua;
+}
+
+string giaiMaThayThe(string vanBan, char khoa) {
+    string ketQua = "";
+    for (char c : vanBan) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            ketQua += char((c - base - (khoa - base) + 26) % 26 + base);
+        } else {
+            ketQua += c;
+        }
+    }
+    return ketQua;
+}
+
+// Hàm mã hóa và giải mã affine
+string maHoaAffine(string vanBan, int a, int b) {
+    string ketQua = "";
+    for (char c : vanBan) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            ketQua += char(((a * (c - base) + b) % 26) + base);
+        } else {
+            ketQua += c;
+        }
+    }
+    return ketQua;
+}
+
+string giaiMaAffine(string vanBan, int a, int b) {
+    string ketQua = "";
+    int a_inv = 0;
+    for (int i = 0; i < 26; i++) {
+        if ((a * i) % 26 == 1) {
+            a_inv = i;
+            break;
+        }
+    }
+    for (char c : vanBan) {
+        if (isalpha(c)) {
+            char base = isupper(c) ? 'A' : 'a';
+            ketQua += char((a_inv * (c - base - b + 26) % 26) + base);
+        } else {
+            ketQua += c;
+        }
+    }
+    return ketQua;
+}
+
+// Hàm lưu kết quả vào tệp
+void luuVaoTep(const string &filename, const string &noiDung) {
+    ofstream file(filename);
+    if (file.is_open()) {
+        file << noiDung;
+        file.close();
+        cout << "Đã lưu kết quả vào tệp " << filename << endl;
+    } else {
+        cout << "Không thể mở tệp " << filename << endl;
+    }
+}
+
+int main() {
+    string vanBan, ketQua;
+    int luaChon;
+    char khoaThayThe;
+    int a, b;
+
+    cout << "Chọn loại mã hóa: (1) Thay thế, (2) Affine: ";
+    cin >> luaChon;
+    cin.ignore();
+
+    cout << "Nhập văn bản: ";
+    getline(cin, vanBan);
+
+    if (luaChon == 1) {
+        cout << "Nhập khóa cho mã hóa Thay thế (chữ cái): ";
+        cin >> khoaThayThe;
+        ketQua = maHoaThayThe(vanBan, khoaThayThe);
+        cout << "Mã hóa Thay thế: " << ketQua << endl;
+        cout << "Giải mã Thay thế: " << giaiMaThayThe(ketQua, khoaThayThe) << endl;
+    } else if (luaChon == 2) {
+        cout << "Nhập khóa a và b cho mã hóa Affine: ";
+        cin >> a >> b;
+        ketQua = maHoaAffine(vanBan, a, b);
+        cout << "Mã hóa Affine: " << ketQua << endl;
+        cout << "Giải mã Affine: " << giaiMaAffine(ketQua, a, b) << endl;
+    } else {
+        cout << "Lựa chọn không hợp lệ!" << endl;
+        return 1;
+    }
+
+    // Lưu kết quả vào tệp
+    string filename;
+    cout << "Nhập tên tệp để lưu kết quả: ";
+    cin >> filename;
+    luuVaoTep(filename, ketQua);
+
+    return 0;
+}
